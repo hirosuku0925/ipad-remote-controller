@@ -1,0 +1,37 @@
+cat << 'EOF' > .github/workflows/build.yml
+name: Build Windows App
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  workflow_dispatch:
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+
+    steps:
+      - name: ソースコードのチェックアウト
+        uses: actions/checkout@v4
+
+      - name: Python のセットアップ
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: 依存関係のインストール (PyInstaller等)
+        run: |
+          python -m pip install --upgrade pip
+          pip install pyinstaller
+
+      - name: Windows 向け .exe のビルド
+        run: |
+          # main.py を単一の .exe ファイルにパッケージング
+          pyinstaller --noconsole --onefile main.py
+
+      - name: 生成した .exe を成果物（Artifact）として保存
+        uses: actions/upload-artifact@v4
+        with:
+          name: Windows-Executable
+          path: dist/main.exe
+EOF
